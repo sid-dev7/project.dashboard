@@ -1,0 +1,26 @@
+Resource,Hourly_Cost,Hours_Worked,Remaining_Hours
+Resource 1,50,8,0
+Resource 2,51,4,4
+Resource 3,52,3,5
+Resource 4,53,6,2
+Resource 5,54,8,0
+Resource 6,55,5,3
+Resource 7,56,7,1
+Resource 8,57,8,0
+Resource 9,58,6,2
+Resource 10,59,6,2
+Resource 11,60,1,7
+Resource 12,61,8,0
+Resource 13,62,6,2
+Resource 14,63,4,4
+Resource 15,64,5,3
+Resource 16,65,0,8
+Resource 17,66,2,6
+Resource 18,67,6,2
+Resource 19,68,8,0
+Resource 20,69,3,5
+Resource 21,70,6,2
+Resource 22,71,5,3
+Resource 23,72,3,5
+Resource 24,73,3,5
+Resource 25,74,6,2

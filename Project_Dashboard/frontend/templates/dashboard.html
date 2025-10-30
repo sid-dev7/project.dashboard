@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Portfolio Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<style>
+body { font-family: Arial, sans-serif; background-color: #f4f5f7; }
+h1 { color: #172b4d; margin-bottom: 20px; }
+.card { border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); margin-bottom: 20px; }
+.card-header { font-weight: bold; color: #fff; }
+.card-total { background-color: #0052cc; }
+.card-completion { background-color: #36b37e; }
+.card-cost { background-color: #ff5630; }
+.card-resources { background-color: #6554c0; }
+.chart-container { margin-bottom: 40px; background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+select { margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="container mt-4">
+    <h1 class="text-center">Portfolio Dashboard</h1>
+
+    <!-- Summary Cards -->
+    <div class="row text-center mb-4">
+        <div class="col-md-3">
+            <div class="card card-total p-3">
+                <div class="card-header">Total Projects</div>
+                <div class="card-body display-6" id="total-projects">10</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-completion p-3">
+                <div class="card-header">Average Completion %</div>
+                <div class="card-body display-6" id="avg-completion">72%</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-cost p-3">
+                <div class="card-header">Total Cost</div>
+                <div class="card-body display-6" id="total-cost">$250,000</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-resources p-3">
+                <div class="card-header">Total Resources</div>
+                <div class="card-body display-6" id="total-resources">25</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Filter -->
+    <div class="chart-container">
+        <h3>Portfolio Timeline & Milestones</h3>
+        <label>Select Project(s):</label>
+        <select id="project-filter" class="form-select w-50" multiple></select>
+        <div id="portfolio-gantt"></div>
+    </div>
+
+    <!-- Resource Filter -->
+    <div class="chart-container">
+        <h3>Resource Utilization</h3>
+        <label>Select Resource(s):</label>
+        <select id="resource-filter" class="form-select w-50" multiple></select>
+        <div id="resource-chart"></div>
+    </div>
+</div>
+
+<script>
+// ---------------- Sample Projects ----------------
+const projects = [
+    {name:"Analytics Dashboard", start:"2025-10-01", end:"2025-11-01", completion:80, milestones:[{name:"M1", due:"2025-10-05", completion:100},{name:"M2", due:"2025-10-15", completion:50},{name:"M3", due:"2025-10-20", completion:100}]},
+    {name:"Website Deployment", start:"2025-10-03", end:"2025-11-10", completion:60, milestones:[{name:"M1", due:"2025-10-07", completion:100},{name:"M2", due:"2025-10-17", completion:40},{name:"M3", due:"2025-10-25", completion:20}]},
+    {name:"Mobile App Launch", start:"2025-10-05", end:"2025-11-15", completion:50, milestones:[{name:"M1", due:"2025-10-10", completion:100},{name:"M2", due:"2025-10-20", completion:40},{name:"M3", due:"2025-10-30", completion:10}]},
+    {name:"Cloud Migration", start:"2025-10-08", end:"2025-11-20", completion:70, milestones:[{name:"M1", due:"2025-10-12", completion:100},{name:"M2", due:"2025-10-22", completion:80},{name:"M3", due:"2025-10-28", completion:50}]},
+    {name:"E-commerce Platform", start:"2025-10-10", end:"2025-11-25", completion:65, milestones:[{name:"M1", due:"2025-10-15", completion:100},{name:"M2", due:"2025-10-25", completion:60},{name:"M3", due:"2025-11-05", completion:30}]},
+    {name:"Internal Tool Development", start:"2025-10-12", end:"2025-11-28", completion:55, milestones:[{name:"M1", due:"2025-10-17", completion:100},{name:"M2", due:"2025-10-27", completion:50},{name:"M3", due:"2025-11-07", completion:20}]},
+    {name:"Data Pipeline Setup", start:"2025-10-14", end:"2025-11-30", completion:75, milestones:[{name:"M1", due:"2025-10-19", completion:100},{name:"M2", due:"2025-10-29", completion:80},{name:"M3", due:"2025-11-10", completion:50}]},
+    {name:"Automation Script", start:"2025-10-16", end:"2025-12-05", completion:60, milestones:[{name:"M1", due:"2025-10-21", completion:100},{name:"M2", due:"2025-10-31", completion:50},{name:"M3", due:"2025-11-15", completion:20}]},
+    {name:"Marketing Campaign", start:"2025-10-18", end:"2025-12-10", completion:45, milestones:[{name:"M1", due:"2025-10-23", completion:100},{name:"M2", due:"2025-11-02", completion:30},{name:"M3", due:"2025-11-18", completion:10}]},
+    {name:"Customer Portal", start:"2025-10-20", end:"2025-12-15", completion:50, milestones:[{name:"M1", due:"2025-10-25", completion:100},{name:"M2", due:"2025-11-05", completion:50},{name:"M3", due:"2025-11-20", completion:10}]}
+];
+
+// ---------------- Sample Resources ----------------
+const resourceNames = ["Mike","Joe","Sarah","Emma","John","Olivia","Liam","Noah","Ava","Sophia","Mason","Lucas","Isabella","Ethan","Mia","Logan","Amelia","Elijah","Charlotte","James","Harper","Benjamin","Evelyn","Alexander","Abigail"];
+const resources = resourceNames.map(name => ({name: name, allocation: Math.floor(Math.random()*60)+20}));
+
+// Populate multi-selects
+const projectFilter = document.getElementById('project-filter');
+projects.forEach(p => { let opt=document.createElement('option'); opt.value=p.name; opt.text=p.name; projectFilter.appendChild(opt); });
+const resourceFilter = document.getElementById('resource-filter');
+resources.forEach(r => { let opt=document.createElement('option'); opt.value=r.name; opt.text=r.name; resourceFilter.appendChild(opt); });
+
+// Draw Portfolio Gantt
+function drawGantt(selectedProjects){
+    let ganttData = [];
+    projects.forEach(p=>{
+        if(selectedProjects.length>0 && !selectedProjects.includes(p.name)) return;
+        ganttData.push({x:[p.start,p.end], y:[p.name,p.name], type:'bar', orientation:'h', marker:{color:'#1f77b4', opacity:0.4}, name:p.name, text:[`Completion: ${p.completion}%`], hoverinfo:'text+x'});
+        p.milestones.forEach(m=>{
+            ganttData.push({x:[p.start,m.due], y:[p.name,p.name], type:'bar', orientation:'h', marker:{color:'#2ca02c', opacity:m.completion/100}, name:`${m.name}`, text:[`${m.name}: ${m.completion}%`], hoverinfo:'text+x'});
+        });
+    });
+    Plotly.newPlot('portfolio-gantt', ganttData, {barmode:'overlay', height:600, margin:{l:150}});
+}
+
+// Draw Resource Chart
+function drawResources(selectedResources){
+    let filtered = resources.filter(r=>selectedResources.length===0 || selectedResources.includes(r.name));
+    Plotly.newPlot('resource-chart',[{x: filtered.map(r=>r.name), y: filtered.map(r=>r.allocation), type:'bar', marker:{color:'#9467bd'}, text: filtered.map(r=>r.allocation+'%'), textposition:'auto'}], {title:'Resource Allocation %', height:400, margin:{t:40}});
+}
+
+// Initial draw
+drawGantt([]);
+drawResources([]);
+
+// Event listeners for multi-select
+projectFilter.addEventListener('change', ()=> {
+    let selected = Array.from(projectFilter.selectedOptions).map(opt=>opt.value);
+    drawGantt(selected);
+});
+resourceFilter.addEventListener('change', ()=> {
+    let selected = Array.from(resourceFilter.selectedOptions).map(opt=>opt.value);
+    drawResources(selected);
+});
+</script>
+</body>
+</html>
